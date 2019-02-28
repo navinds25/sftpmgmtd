@@ -1,0 +1,15 @@
+pull_config:
+  -
+    transfer_id: data2->_junk
+    description: some test transfer
+    source:
+      remote:
+        remote_path: /home/navin/go/src/github.com/navinds25/sftpmgmtd/_junk/in/file1.txt
+        host: 127.0.0.1
+        port: 28888
+        auth:
+          username: testusr
+          password: tiger
+    destination:
+      local:
+        local_path: /home/navin/go/src/github.com/navinds25/sftpmgmtd/_junk/out/
