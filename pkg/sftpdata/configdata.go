@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/dgraph-io/badger"
-	config "github.com/navinds25/sftpmgmt/pkg/sftpconfig"
+	"github.com/navinds25/sftpmgmt/pkg/sftpconfig"
 )
 
 // InitConfigDB Initializes the Database
@@ -15,10 +15,20 @@ func InitConfigDB(s ConfigStore) {
 // ConfigStore is the main interface for the backend
 type ConfigStore interface {
 	CheckConfigExists([]byte) (bool, error)
-	AddSFTPEntry(*config.TransferConfig) error
+	AddSFTPEntry(*sftpconfig.TransferConfig) error
 	DeleteSFTPEntry(string) error
 	//UpdateSFTPEntry()
-	GetAll() ([]config.TransferConfig, error)
+	GetAll() ([]sftpconfig.TransferConfig, error)
+	CloseConfigDB() error
+}
+
+// CloseConfigDB closes the database.
+// This is because we are not setting up the DB from the main function.
+func (badgerDB BadgerDB) CloseConfigDB() error {
+	if err := badgerDB.ConfigDB.Close(); err != nil {
+		return err
+	}
+	return nil
 }
 
 // CheckConfigExists checks for a key in the DB
@@ -38,12 +48,17 @@ func (badgerDB BadgerDB) CheckConfigExists(id []byte) (bool, error) {
 }
 
 // AddSFTPEntry is for adding a SFTP Config entry.
-func (badgerDB BadgerDB) AddSFTPEntry(config *config.TransferConfig) error {
+func (badgerDB BadgerDB) AddSFTPEntry(config *sftpconfig.TransferConfig) error {
 	if err := config.EncryptSecureFields(); err != nil {
 		return err
 	}
 	value, err := config.EncodeGob()
 	if err != nil {
+		return err
+	}
+	txn := badgerDB.ConfigDB.NewTransaction(true)
+	defer txn.Discard()
+	if err := txn.Set([]byte(config.TransferID), value); err != nil {
 		return err
 	}
 	err = badgerDB.ConfigDB.Update(func(txn *badger.Txn) error {
@@ -52,9 +67,6 @@ func (badgerDB BadgerDB) AddSFTPEntry(config *config.TransferConfig) error {
 		}
 		return nil
 	})
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
@@ -68,11 +80,11 @@ func (badgerDB BadgerDB) DeleteSFTPEntry(id string) error {
 }
 
 // GetAll returns the entire configuration. TODO: use streams
-func (badgerDB BadgerDB) GetAll() ([]config.TransferConfig, error) {
-	id1 := config.TransferConfig{
+func (badgerDB BadgerDB) GetAll() ([]sftpconfig.TransferConfig, error) {
+	id1 := sftpconfig.TransferConfig{
 		TransferID: "id1",
 	}
-	allConfig := []config.TransferConfig{}
+	allConfig := []sftpconfig.TransferConfig{}
 	allConfig = append(allConfig, id1)
 	return allConfig, nil
 }

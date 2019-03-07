@@ -2,7 +2,7 @@ COMMIT=$(shell git rev-parse --short HEAD)
 DATE=$(shell date +%F)
 BUILD=$(shell echo "${BUILDNUMBER}")
 CWD=$(shell pwd)
-NAME=sftpmgmt
+GRPCNAME=sftp
 GO_LDFLAGS=-ldflags "-X main.Version=build="$(BUILD)"|commit="$(COMMIT)"|date="$(DATE)""
 
 all: clean proto test fmt lint vet megacheck build cover
@@ -10,18 +10,19 @@ all: clean proto test fmt lint vet megacheck build cover
 .PHONY: build
 build:
 	mkdir bin | tee /dev/stderr
-	cd bin && go build ../cmd/encryptKeyInit/encryptKeyInit.go
 	cd bin && go build ${GO_LDFLAGS} ../cmd/sftpmgmtd/sftpmgmtd.go
 	cd bin && go build ${GO_LDFLAGS} ../cmd/sftpmgmt/sftpmgmt.go
 
+.PHONY: proto
 proto:
-	rm -v pkg/styxevent/* | tee /dev/stderr && rmdir pkg/styxevent
-	mkdir pkg/styxevent
-	protoc -I. ${NAME}event.proto --go_out=plugins=grpc:pkg/${NAME}event
+	#rm -v pkg/sftpevent/* | tee /dev/stderr && rmdir pkg/sftpevent
+	mkdir pkg/sftpevent
+	protoc -I. ${GRPCNAME}event.proto --go_out=plugins=grpc:pkg/${GRPCNAME}event
 
 .PHONY: clean
 clean:
-	rm -rfv bin | tee /dev/stderr ; rm -v pkg/styxevent/* | tee /dev/stderr ; rm -v coverage.txt | tee /dev/stderr
+	rm -v pkg/sftpevent/* | tee /dev/stderr && rmdir pkg/sftpevent
+	rm -rfv bin | tee /dev/stderr ; rm -v pkg/sftpevent/* | tee /dev/stderr ; rm -v coverage.txt | tee /dev/stderr
 
 .PHONY: test
 test:

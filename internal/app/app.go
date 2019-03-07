@@ -46,24 +46,22 @@ func DBSetup() error {
 	configDBopts := badger.DefaultOptions
 	configDBopts.Dir = configDBDir
 	configDBopts.ValueDir = path.Join(configDBDir, "value")
-	configDBopts.Logger = log.StandardLogger()
+	//configDBopts.Logger = log.StandardLogger()
 	configDB, err := badger.Open(configDBopts)
 	if err != nil {
 		return err
 	}
-	defer configDB.Close()
 	sftpdata.InitConfigDB(sftpdata.BadgerDB{
 		ConfigDB: configDB,
 	})
 	filesDBopts := badger.DefaultOptions
 	filesDBopts.Dir = filesDBDir
 	filesDBopts.ValueDir = path.Join(filesDBDir, "value")
-	filesDBopts.Logger = log.StandardLogger()
+	//filesDBopts.Logger = log.StandardLogger()
 	filesDB, err := badger.Open(filesDBopts)
 	if err != nil {
 		return err
 	}
-	defer filesDB.Close()
 	sftpdata.InitFilesDB(sftpdata.BadgerDB{
 		FilesDB: filesDB,
 	})

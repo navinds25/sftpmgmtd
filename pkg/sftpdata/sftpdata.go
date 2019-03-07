@@ -18,3 +18,14 @@ type DataStore struct {
 
 // Data is the instance of DataStore
 var Data DataStore
+
+// Close close the database.
+func (badgerDB BadgerDB) Close() error {
+	if err := badgerDB.ConfigDB.Close(); err != nil {
+		return err
+	}
+	if err := badgerDB.FilesDB.Close(); err != nil {
+		return err
+	}
+	return nil
+}

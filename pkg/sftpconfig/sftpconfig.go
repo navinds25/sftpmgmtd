@@ -29,6 +29,7 @@ type Config interface {
 type TransferConfig struct {
 	TransferID  string `json:"transfer_id"`
 	Description string `json:"description"`
+	Type        string `json:"type"`
 	Source      struct {
 		Local struct {
 			LocalFile string `json:"local_file"`

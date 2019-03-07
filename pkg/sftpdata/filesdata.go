@@ -11,11 +11,22 @@ type FilesStore interface {
 	AddFile() error
 	GetFile() error
 	DeleteFile() error
+	CloseFilesDB() error
+}
+
+// CloseFilesDB closes the database.
+// This is because we are not setting up the DB from the main function.
+func (badgerDB BadgerDB) CloseFilesDB() error {
+	if err := badgerDB.FilesDB.Close(); err != nil {
+		return err
+	}
+	return nil
 }
 
 // CheckFileExists checks if a file exists in the database.
 func (badgerDB BadgerDB) CheckFileExists(key []byte) (bool, error) {
 	txn := badgerDB.FilesDB.NewTransaction(false)
+	defer txn.Discard()
 	_, err := txn.Get(key)
 	if err != nil {
 		if err.Error() == "ErrKeyNotFound" {

@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.grpc.examples.sftpevent";
+option java_outer_classname = "sftpevent";
+
+package sftpevent;
+
+service Sftp {
+    rpc GRPCTest (Ack) returns (Ack);
+    rpc AddConfig (SftpTransferConfig) returns (Ack);
+}
+
+message Ack {
+    string message = 1;
+    string error = 2;
+}
+
+message SftpTransferConfig {
+    string transferid = 1;
+    string description = 2;
+    enum TransferType {
+        Pull = 0;
+        Push = 1;
+    }
+    TransferType type = 3;
+    string localfile = 4;
+    string remotefile = 5;
+    string localpath = 6;
+    string remotepath = 7;
+    string remotehost = 8;
+    int32 remoteport = 9;
+    string remoteuser = 10;
+    string remotepassword = 11;
+    string remotekey = 12;
+    message foo {
+        string bar = 1;
+    }
+}
